@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="100mm"
+   height="100mm"
+   viewBox="0 0 100 100"
+   version="1.1"
+   id="svg8263"
+   inkscape:version="0.92.1 r15371"
+   sodipodi:docname="instructions2.svg"
+   inkscape:export-filename="/home/user/Documents/git/platformeng/instructions2.png"
+   inkscape:export-xdpi="57.149998"
+   inkscape:export-ydpi="57.149998">
+  <defs
+     id="defs8257" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.49497475"
+     inkscape:cx="82.473482"
+     inkscape:cy="515.07857"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1010"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata8260">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-197)">
+    <g
+       id="g8848"
+       transform="translate(0,-6.9719806)">
+      <rect
+         style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.87405163;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect7682-0-5-9"
+         width="46.251999"
+         height="23.125946"
+         x="26.874001"
+         y="241.28026"
+         ry="3.4962065"
+         rx="3.4962065" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8.46666622px;line-height:1.25;font-family:chalk;-inkscape-font-specification:chalk;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.21166664"
+         x="35.166798"
+         y="256.54654"
+         id="text7694-6-9-7"><tspan
+           sodipodi:role="line"
+           id="tspan7692-1-4-7"
+           x="35.166798"
+           y="256.54654"
+           style="font-size:10.15999985px;stroke-width:0.21166664">SHIFT</tspan></text>
+    </g>
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot7828"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:1.25;font-family:chalk;-inkscape-font-specification:chalk;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       transform="matrix(0.26458333,0,0,0.26458333,8.2376912,204.3302)"><flowRegion
+         id="flowRegion7830"><rect
+           id="rect7832"
+           width="348.86966"
+           height="83.778732"
+           x="86.279594"
+           y="34.408016" /></flowRegion><flowPara
+         id="flowPara7834"
+         style="font-size:53.33333588px">Press</flowPara></flowRoot>    <flowRoot
+       xml:space="preserve"
+       id="flowRoot7828-0"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:1.25;font-family:chalk;-inkscape-font-specification:chalk;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       transform="matrix(0.26458333,0,0,0.26458333,-20.356602,254.53885)"><flowRegion
+         id="flowRegion7830-3"><rect
+           id="rect7832-0"
+           width="444.58395"
+           height="96.63588"
+           x="86.279594"
+           y="34.408016" /></flowRegion><flowPara
+         id="flowPara7834-4"
+         style="font-size:53.33333588px">to time travel</flowPara></flowRoot>  </g>
+</svg>
