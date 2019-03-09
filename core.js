@@ -23,6 +23,8 @@ function init() {
   initControls();
   map = new Map();
   
+  map.background = image("tile-base.png");
+  
   //---Create map---
   map.addBox(new Box(-1500, 500, 300, 50, {animFunc: function(box, time) {
     var idx = (time / 1000) % (Math.PI * 2);

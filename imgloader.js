@@ -1,7 +1,9 @@
 var imgs = {};
 var imgURLs = [
   ["coin", "coin.png"],
-  ["portal", "portal.png"]
+  ["portal", "portal.png"],
+  ["brick", "brick.png"],
+  ["slime", "slime.png"]
 ];
 for(var i = 0; i < imgURLs.length; i++) {
   var img = document.createElement("img");

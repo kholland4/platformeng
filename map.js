@@ -30,7 +30,7 @@ class Box {
     return false;
   }
   
-  animate(time) {
+  animate(time, timeScale) {
     if(this.animFunc != undefined) {
       var oldX = this.x;
       var oldY = this.y;
@@ -41,8 +41,18 @@ class Box {
   }
   
   draw(ctx, voffset={"x": 0, "y": 0}, scale=1) {
-    ctx.fillStyle = this.color;
-    ctx.fillRect((this.x - voffset.x) * scale, (this.y - voffset.y) * scale, this.w * scale, this.h * scale);
+    var img = imgs.brick;
+    if(this.sticky) { img = imgs.slime; }
+    if(imgLoaded(img)) {
+      for(var x = 0; x < this.w / 50; x++) {
+        for(var y = 0; y < this.h / 50; y++) {
+          ctx.drawImage(img, (this.x - voffset.x + (x * 50)) * scale, (this.y - voffset.y + (y * 50)) * scale, 50 * scale, 50 * scale);
+        }
+      }
+    } else {
+      ctx.fillStyle = this.color;
+      ctx.fillRect((this.x - voffset.x) * scale, (this.y - voffset.y) * scale, this.w * scale, this.h * scale);
+    }
   }
 }
 
@@ -52,6 +62,7 @@ class Coin {
     this.y = y;
     this.color = "yellow";
     this.radius = 20;
+    this.exists = true;
   }
   
   static fromBox(box, idx=1, qty=1) {
@@ -64,16 +75,20 @@ class Coin {
   get state() {
     return {
       x: this.x,
-      y: this.y
+      y: this.y,
+      exists: this.exists
     };
   }
   
   set state(data) {
     this.x = data.x;
     this.y = data.y;
+    this.exists = data.exists;
   }
   
   draw(ctx, voffset={"x": 0, "y": 0}, scale=1) {
+    if(!this.exists) { return; }
+    
     if(imgLoaded(imgs.coin)) {
       ctx.drawImage(imgs.coin, (this.x - voffset.x - this.radius) * scale, (this.y - voffset.y - this.radius) * scale, this.radius * 2 * scale, this.radius * 2 * scale);
     } else {
@@ -115,6 +130,18 @@ class Portal {
   boundingBox() {
     return new Box(Math.round(this.x) - this.radius, Math.round(this.y) - this.radius, this.radius * 2, this.radius * 2);
   }
+  
+  interact(player) {
+    var bbox = player.boundingBox();
+    if(this.boundingBox().collide(bbox)) {
+      var vec = player.getSpeed();
+      var len = Math.sqrt(Math.pow(vec.x, 2) + Math.pow(vec.y, 2));
+      var tlen = (Math.max(bbox.w / 2, bbox.h / 2) + this.partner.radius) * 1.5;
+      vec.x *= (tlen / len);
+      vec.y *= (tlen / len);
+      player.setPos(this.partner.x + vec.x, this.partner.y + vec.y);
+    }
+  }
 }
 
 class Entity {
@@ -146,7 +173,7 @@ class Entity {
     return e;
   }
   
-  animate(timeScale) {
+  animate(time, timeScale) {
     //---Controls---
     if(this.behavior == Entity.B_PACING && this.contactBox != undefined) {
       if(this.pos.x - this.drawData.radius < this.contactBox.x) {
@@ -312,96 +339,130 @@ class Annotation {
 }
 
 class Map {
+  static OBJ_STATIC = 2;
+  static OBJ_TRACKED = 3;
+  static OBJ_UNTRACKED = 4;
+  
   constructor() {
-    this.boxes = [];
-    this.coins = [];
-    this.portals = [];
-    this.entities = [];
-    this.annotations = [];
+    this.sobjects = [];
+    this.tobjects = [];
+    this.uobjects = [];
+    
+    this.background = undefined;
+  }
+  
+  addObject(obj, type=Map.OBJ_TRACKED) {
+    if(type == Map.OBJ_STATIC) { this.sobjects.push(obj); } else
+    if(type == Map.OBJ_TRACKED) { this.tobjects.push(obj); } else
+    if(type == Map.OBJ_UNTRACKED) { this.uobjects.push(obj); }
   }
   
   addBox(box) {
-    this.boxes.push(box);
+    this.addObject(box, Map.OBJ_STATIC);
     this.lastBox = box;
   }
   
   addCoin(coin) {
-    this.coins.push(coin);
+    this.addObject(coin);
   }
   
   addPortal(p1, p2) {
     p1.partner = p2;
     p2.partner = p1;
-    this.portals.push(p1);
-    this.portals.push(p2);
+    this.addObject(p1, Map.OBJ_STATIC);
+    this.addObject(p2, Map.OBJ_STATIC);
   }
   
   addEntity(entity) {
     entity.map = this;
-    this.entities.push(entity);
+    this.addObject(entity);
   }
   
   addAnnotation(annotation) {
-    this.annotations.push(annotation);
+    this.addObject(annotation);
   }
   
   collide(box) {
-    for(var i = 0; i < this.boxes.length; i++) {
-      if(this.boxes[i].collide(box)) {
-        return this.boxes[i];
+    var o = [this.sobjects, this.tobjects, this.uobjects];
+    for(var n = 0; n < o.length; n++) {
+      for(var i = 0; i < o[n].length; i++) {
+        if(o[n][i] instanceof Box) {
+          if(o[n][i].collide(box)) {
+            return o[n][i];
+          }
+        }
       }
     }
     return false;
   }
   
   animate(time, timeScale, controls=this.controls) {
-    for(var i = 0; i < this.boxes.length; i++) {
-      this.boxes[i].animate(time);
-    }
-    
-    for(var i = 0; i < this.entities.length; i++) {
-      this.entities[i].animate(timeScale);
+    var o = [this.sobjects, this.tobjects, this.uobjects];
+    for(var n = 0; n < o.length; n++) {
+      for(var i = 0; i < o[n].length; i++) {
+        if("animate" in o[n][i]) {
+          o[n][i].animate(time, timeScale);
+        }
+      }
     }
     
     if(controls != undefined) {
       if(controls.any) {
-        for(var i = 0; i < this.annotations.length; i++) {
-          this.annotations[i].autohide();
+        for(var i = 0; i < this.tobjects.length; i++) {
+          if(this.tobjects[i] instanceof Annotation) {
+            this.tobjects[i].autohide();
+          }
         }
       }
     }
   }
   
   draw(ctx, voffset={"x": 0, "y": 0}, scale=1) {
-    for(var i = 0; i < this.boxes.length; i++) {
-      this.boxes[i].draw(ctx, voffset, scale);
+    var tile = this.background;
+    if(tile != undefined) {
+      if(imgLoaded(tile)) {
+        var tileW = 512;
+        var tileH = 512;
+        
+        var dw = ctx.canvas.width;
+        var dh = ctx.canvas.height;
+        
+        var xmin = Math.floor(voffset.x / tileW) * tileW;
+        var ymin = Math.floor(voffset.y / tileH) * tileH;
+        
+        var xmax = Math.ceil((voffset.x + (dw * (1 / scale))) / tileW) * tileW;
+        var ymax = Math.ceil((voffset.y + (dh * (1 / scale))) / tileH) * tileH;
+        
+        for(var x = xmin; x < xmax; x += tileW) {
+          for(var y = ymin; y < ymax; y += tileH) {
+            ctx.drawImage(tile, (x - voffset.x) * scale, (y - voffset.y) * scale, tileW * scale, tileH * scale);
+          }
+        }
+      }
     }
     
-    for(var i = 0; i < this.coins.length; i++) {
-      this.coins[i].draw(ctx, voffset, scale);
-    }
-    
-    for(var i = 0; i < this.portals.length; i++) {
-      this.portals[i].draw(ctx, voffset, scale);
-    }
-    
-    for(var i = 0; i < this.entities.length; i++) {
-      this.entities[i].draw(ctx, voffset, scale);
-    }
-    
-    for(var i = 0; i < this.annotations.length; i++) {
-      this.annotations[i].draw(ctx, voffset, scale);
+    var o = [this.sobjects, this.tobjects, this.uobjects];
+    for(var n = 0; n < o.length; n++) {
+      for(var i = 0; i < o[n].length; i++) {
+        if("draw" in o[n][i]) {
+          o[n][i].draw(ctx, voffset, scale);
+        }
+      }
     }
   }
   
   gatherCoins(player) {
     var bbox = player.boundingBox();
     var coinCount = 0;
-    for(var i = 0; i < this.coins.length; i++) {
-      if(this.coins[i].boundingBox().collide(bbox)) {
-        this.coins.splice(i, 1);
-        i--;
-        coinCount++;
+    var o = [this.sobjects, this.tobjects, this.uobjects];
+    for(var n = 0; n < o.length; n++) {
+      for(var i = 0; i < o[n].length; i++) {
+        if(o[n][i] instanceof Coin) {
+          if(o[n][i].boundingBox().collide(bbox) && o[n][i].exists) {
+            o[n][i].exists = false;
+            coinCount++;
+          }
+        }
       }
     }
     return coinCount;
@@ -409,33 +470,23 @@ class Map {
   
   interact(player) {
     var bbox = player.boundingBox();
-    for(var i = 0; i < this.portals.length; i++) {
-      if(this.portals[i].boundingBox().collide(bbox)) {
-        var vec = player.getSpeed();
-        var len = Math.sqrt(Math.pow(vec.x, 2) + Math.pow(vec.y, 2));
-        var tlen = (Math.max(bbox.w / 2, bbox.h / 2) + this.portals[i].partner.radius) * 1.5;
-        vec.x *= (tlen / len);
-        vec.y *= (tlen / len);
-        player.setPos(this.portals[i].partner.x + vec.x, this.portals[i].partner.y + vec.y);
-        break;
+    for(var i = 0; i < this.sobjects.length; i++) {
+      if("interact" in this.sobjects[i]) {
+        this.sobjects[i].interact(player);
       }
     }
   }
   
   get state() {
-    var coinData = [];
-    for(var i = 0; i < this.coins.length; i++) {
-      coinData.push(this.coins[i].state);
+    var tData = [];
+    for(var i = 0; i < this.tobjects.length; i++) {
+      if("state" in this.tobjects[i]) {
+        tData.push(this.tobjects[i].state);
+      } else {
+        tData.push(false);
+      }
     }
-    var entityData = [];
-    for(var i = 0; i < this.entities.length; i++) {
-      entityData.push(this.entities[i].state);
-    }
-    var annotationData = [];
-    for(var i = 0; i < this.annotations.length; i++) {
-      annotationData.push(this.annotations[i].state);
-    }
-    var data = {coins: coinData, entities: entityData, annotations: annotationData};
+    var data = {data: tData};
     if(this.controls != undefined) {
       data.controls = JSON.parse(JSON.stringify(this.controls));
     }
@@ -443,27 +494,11 @@ class Map {
   }
   
   set state(d) {
-    var data = d.coins;
-    this.coins = [];
-    for(var i = 0; i < data.length; i++) {
-      var c = new Coin();
-      c.state = data[i];
-      this.coins.push(c);
-    }
-    
-    var data = d.entities;
-    //this.entities = [];
-    for(var i = 0; i < Math.min(this.entities.length, data.length); i++) {
-      /*var c = new Entity();
-      c.map = this;
-      c.state = data[i];
-      this.entities.push(c);*/
-      this.entities[i].state = data[i];
-    }
-    
-    var data = d.annotations;
-    for(var i = 0; i < Math.min(this.annotations.length, data.length); i++) {
-      this.annotations[i].state = data[i];
+    var data = d.data;
+    for(var i = 0; i < Math.min(this.tobjects.length, data.length); i++) {
+      if("state" in this.tobjects[i]) {
+        this.tobjects[i].state = data[i];
+      }
     }
   }
 }

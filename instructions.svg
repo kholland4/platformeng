@@ -29,9 +29,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.5994512"
-     inkscape:cx="1905.4308"
-     inkscape:cy="240.92812"
+     inkscape:zoom="0.5654914"
+     inkscape:cx="1053.0695"
+     inkscape:cy="342.25815"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -57,6 +57,13 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,-47)">
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.99996328;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:1.99996332, 5.99988995;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect4670"
+       width="500"
+       height="250"
+       x="0"
+       y="47" />
     <flowRoot
        xml:space="preserve"
        id="flowRoot7684"
@@ -441,7 +448,7 @@
          style="font-size:16.93333244px;stroke-width:0.26458332"
          id="tspan8074-4-1">Collect          s</tspan></text>
     <rect
-       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.99996334;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:1.99996334,5.99989003;stroke-opacity:1;stroke-dashoffset:0"
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.99996328;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:1.99996334, 5.99989003;stroke-dashoffset:0;stroke-opacity:1"
        id="rect4687"
        width="498.00003"
        height="248.00003"
