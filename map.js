@@ -430,6 +430,14 @@ class Annotation extends GameObject {
     }
   }
   
+  boundingBox() {
+    return new Box(this.x, this.y, this.w, this.h);
+  }
+  
+  collide(map=this.map) {
+    return map.collide(this.boundingBox());
+  }
+  
   get state() {
     return {
       "visible": this.visible
@@ -448,7 +456,15 @@ class Annotation extends GameObject {
   getCenter() {
     return {"x": Math.round(this.x + (this.w / 2)), "y": Math.round(this.y + (this.h / 2))};
   }
+  
+  get imgref() {
+    return getImgIndex(this.data) || "";
+  }
+  set imgref(val) {
+    if(val != null && val != "" && val in imgs) { this.data = imgs[val]; }
+  }
 }
+Object.defineProperty(Annotation.prototype, "imgref", {enumerable: true});
 
 class Map {
   static OBJ_STATIC = 2;

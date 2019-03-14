@@ -161,6 +161,8 @@ function init() {
       addObject(new Box(0, 0, 300, 50));
     } else if(e.key == "c") {
       addObject(new Coin(0, 0));
+    } else if(e.key == "n") {
+      addObject(new Annotation(0, 0, 100, 100, "image", imgs.coin));
     }
   });
   
