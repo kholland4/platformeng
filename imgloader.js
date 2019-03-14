@@ -3,7 +3,9 @@ var imgURLs = [
   ["coin", "coin.png"],
   ["portal", "portal.png"],
   ["brick", "brick.png"],
-  ["slime", "slime.png"]
+  ["block", "block.png"],
+  ["slime", "slime.png"],
+  ["bktile", "tile-base.png"]
 ];
 for(var i = 0; i < imgURLs.length; i++) {
   var img = document.createElement("img");
@@ -29,4 +31,16 @@ function image(url) {
   var img = document.createElement("img");
   img.src = url;
   return img;
+}
+
+function getImgIndex(img) {
+  for(var key in imgs) {
+    if(imgs[key] == img) {
+      return key;
+    }
+  }
+}
+
+function getImg(name, defaultVal=imgs.block) { //FIXME more generic default
+  return imgs[name] || defaultVal;
 }

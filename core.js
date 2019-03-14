@@ -23,27 +23,17 @@ function init() {
   initControls();
   map = new Map();
   
-  map.background = image("tile-base.png");
+  map.background = imgs.bktile;
   
   //---Create map---
-  map.addBox(new Box(-1500, 500, 300, 50, {animFunc: function(box, time) {
-    var idx = (time / 1000) % (Math.PI * 2);
-    box.y = box.origY + Math.round(Math.sin(idx) * 200);
-  }}));
+  /*map.addBox(new Box(-1500, 500, 300, 50, {animFunc: {y: {range: 200}}}));
   map.addEntity(Entity.fromBox(map.lastBox, 100, 0, Entity.B_PACING));//--------
-  map.addBox(new Box(-800, 500, 300, 50, {animFunc: function(box, time) {
-    var idx = (time / 1000) % (Math.PI * 2);
-    box.x = box.origX + Math.round(Math.sin(idx) * 200);
-    box.y = box.origY + Math.round(Math.sin(idx) * -100);
-  }, bouncy: true}));
+  map.addBox(new Box(-800, 500, 300, 50, {animFunc: {x: {range: 200}, y: {range: -100}}, bouncy: true}));
   map.addBox(new Box(-2500, 300, 600, 50));
   map.addCoin(Coin.fromBox(map.lastBox, 1, 3));
   map.addCoin(Coin.fromBox(map.lastBox, 2, 3));
   map.addCoin(Coin.fromBox(map.lastBox, 3, 3));
-  map.addBox(new Box(-3200, 200, 150, 150, {animFunc: function(box, time) {
-    var idx = (time / 1000) % (Math.PI * 2);
-    box.x = box.origX + Math.round(Math.sin(idx) * 300);
-  }}));
+  map.addBox(new Box(-3200, 200, 150, 150, {animFunc: {x: {range: 300}}}));
   map.addBox(new Box(-4350, 300, 600, 50));
   map.addCoin(Coin.fromBox(map.lastBox, 1, 3));
   map.addCoin(Coin.fromBox(map.lastBox, 2, 3));
@@ -56,10 +46,7 @@ function init() {
   map.addCoin(Coin.fromBox(map.lastBox));
   map.addBox(new Box(1050, -400, 50, 300, {color: "#22ff22", sticky: true}));
   map.addBox(new Box(520, -550, 300, 50));
-  map.addBox(new Box(440, -1150, 50, 300, {color: "#22ff22", sticky: true, animFunc: function(box, time) {
-    var idx = ((time + 500) / 1000) % (Math.PI * 2);
-    box.y = box.origY + Math.round(Math.sin(idx) * 300);
-  }}));
+  map.addBox(new Box(440, -1150, 50, 300, {color: "#22ff22", sticky: true, animFunc: {y: {offset: 500, range: 300}}}));
   map.addBox(new Box(620, -1450, 300, 50));
   map.addCoin(Coin.fromBox(map.lastBox, 1, 3));
   map.addCoin(Coin.fromBox(map.lastBox, 2, 3));
@@ -69,11 +56,18 @@ function init() {
   map.addPortal(new Portal(-750, -490), new Portal(-1000, -1100));
   map.addBox(new Box(-1150, -700, 300, 50));
   //------
+  map.addBox(new Box(-5000, 1000, 10000, 50, {tex: imgs.brick, death: true}));*/
   
   player = new Player(map);
   player.pos.x = 20;
   
   hud = new HUD(player, map);
+  
+  loadf("level1.json", function() {
+    try {
+      deserializeGame(JSON.parse(this.responseText));
+    } catch(e) {}
+  });
   
   animate();
 }
@@ -99,7 +93,7 @@ function animate() {
   var timeDelta = time - prevTime;
   prevTime = time;
   if(timeDelta > 500) {
-    ttime += timeDelta - 450;
+    timelineOffset += timeDelta - 450;
     timeDelta = 50;
   }
   var timeScale = timeDelta / 1000;

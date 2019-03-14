@@ -1,5 +1,48 @@
-class Box {
+class GameObject {
+  constructor() {
+    
+  }
+  
+  kwarg(kwargs, name, defaultValue) {
+    if(name in kwargs) {
+      this[name] = kwargs[name];
+    } else {
+      this[name] = defaultValue;
+    }
+  }
+  
+  serialize() {
+    var data = {};
+    for(var key in this) {
+      if(typeof this[key] != "undefined" && typeof this[key] != "function" && !(typeof this[key] == "object" && this[key].constructor.name != "Object")) {
+        data[key] = this[key];
+      }
+    }
+    return data;
+  }
+  
+  static deserialize(data) {
+    var obj = new this();
+    for(var key in data) {
+      obj[key] = data[key];
+    }
+    return obj;
+  }
+  
+  setCenter(d) {
+    this.x = Math.round(d.x);
+    this.y = Math.round(d.y);
+  }
+  
+  getCenter() {
+    return {"x": this.x, "y": this.y};
+  }
+}
+
+class Box extends GameObject {
   constructor(x, y, w, h, kwargs={}) {
+    super();
+    
     this.x = x;
     this.y = y;
     this.origX = x;
@@ -9,18 +52,17 @@ class Box {
     this.w = w;
     this.h = h;
     
+    this.solid = true;
+    
     this.kwarg(kwargs, "animFunc");
     this.kwarg(kwargs, "bouncy", false);
     this.kwarg(kwargs, "sticky", false);
     this.kwarg(kwargs, "color", "red");
-  }
+    this.kwarg(kwargs, "death", false);
     
-  kwarg(kwargs, name, defaultValue) {
-    if(name in kwargs) {
-      this[name] = kwargs[name];
-    } else {
-      this[name] = defaultValue;
-    }
+    var defaultTex = imgs.block;
+    if(this.sticky) { defaultTex = imgs.slime; }
+    this.kwarg(kwargs, "tex", defaultTex);
   }
   
   collide(box) {
@@ -34,15 +76,27 @@ class Box {
     if(this.animFunc != undefined) {
       var oldX = this.x;
       var oldY = this.y;
-      this.animFunc(this, time);
+      if(typeof this.animFunc == "function") {
+        this.animFunc(this, time);
+      } else {
+        if(this.animFunc.x != undefined) {
+          var offset = this.animFunc.x.offset || 0; var rate = this.animFunc.x.rate || 1; var range = this.animFunc.x.range || 100;
+          var idx = (((time + offset) / 1000) * rate) % (Math.PI * 2);
+          this.x = this.origX + Math.round(Math.sin(idx) * range);
+        }
+        if(this.animFunc.y != undefined) {
+          var offset = this.animFunc.y.offset || 0; var rate = this.animFunc.y.rate || 1; var range = this.animFunc.y.range || 100;
+          var idx = (((time + offset) / 1000) * rate) % (Math.PI * 2);
+          this.y = this.origY + Math.round(Math.sin(idx) * range);
+        }
+      }
       this.deltaX = this.x - oldX;
       this.deltaY = this.y - oldY;
     }
   }
   
   draw(ctx, voffset={"x": 0, "y": 0}, scale=1) {
-    var img = imgs.brick;
-    if(this.sticky) { img = imgs.slime; }
+    var img = this.tex;
     if(imgLoaded(img)) {
       for(var x = 0; x < this.w / 50; x++) {
         for(var y = 0; y < this.h / 50; y++) {
@@ -54,14 +108,51 @@ class Box {
       ctx.fillRect((this.x - voffset.x) * scale, (this.y - voffset.y) * scale, this.w * scale, this.h * scale);
     }
   }
+  
+  setCenter(d) {
+    this.x = Math.round(d.x - (this.w / 2));
+    this.y = Math.round(d.y - (this.h / 2));
+    this.origX = this.x;
+    this.origY = this.y;
+  }
+  
+  getCenter() {
+    return {"x": Math.round(this.x + (this.w / 2)), "y": Math.round(this.y + (this.h / 2))};
+  }
+  
+  get texref() {
+    return getImgIndex(this.tex) || "";
+  }
+  set texref(val) {
+    if(val != null && val != "" && val in imgs) { this.tex = imgs[val]; }
+  }
+  
+  get anim() {
+    if(this.animFunc != undefined && typeof this.animFunc != "function") {
+      return JSON.stringify(this.animFunc);
+    }
+    return "";
+  }
+  set anim(val) {
+    if(val == "" || val == null) { return; }
+    try {
+      var d = JSON.parse(val);
+      this.animFunc = d;
+    } catch(e) {
+      
+    }
+  }
 }
+Object.defineProperty(Box.prototype, "texref", {enumerable: true});
+Object.defineProperty(Box.prototype, "anim", {enumerable: true});
 
-class Coin {
+class Coin extends GameObject {
   constructor(x, y) {
+    super();
     this.x = x;
     this.y = y;
     this.color = "yellow";
-    this.radius = 20;
+    this.radius = 24;
     this.exists = true;
   }
   
@@ -102,10 +193,15 @@ class Coin {
   boundingBox() {
     return new Box(Math.round(this.x) - this.radius, Math.round(this.y) - this.radius, this.radius * 2, this.radius * 2);
   }
+  
+  collide(box) {
+    return this.boundingBox().collide(box);
+  }
 }
 
-class Portal {
+class Portal extends GameObject {
   constructor(x, y, partner) {
+    super();
     this.x = x;
     this.y = y;
     this.radius = 75;
@@ -131,6 +227,10 @@ class Portal {
     return new Box(Math.round(this.x) - this.radius, Math.round(this.y) - this.radius, this.radius * 2, this.radius * 2);
   }
   
+  collide(box) {
+    return this.boundingBox().collide(box);
+  }
+  
   interact(player) {
     var bbox = player.boundingBox();
     if(this.boundingBox().collide(bbox)) {
@@ -144,11 +244,12 @@ class Portal {
   }
 }
 
-class Entity {
+class Entity extends GameObject {
   static get B_CONSTANT() { return 2; }
   static get B_PACING() { return 3; }
   
   constructor(x, y, sx=0, sy=0, behavior=Entity.B_CONSTANT, speedMul=2, map) {
+    super();
     this.map = map;
     
     this.behavior = behavior;
@@ -281,10 +382,20 @@ class Entity {
     this.canJump = state.canJump;
     this.behavior = state.behavior;
   }
+  
+  setCenter(d) {
+    this.pos.x = Math.round(d.x);
+    this.pos.y = Math.round(d.y);
+  }
+  
+  getCenter() {
+    return {"x": this.pos.x, "y": this.pos.y};
+  }
 }
 
-class Annotation {
+class Annotation extends GameObject {
   constructor(x, y, w, h, type="text", data="", kwargs={}) {
+    super();
     this.x = x;
     this.y = y;
     this.w = w;
@@ -294,14 +405,6 @@ class Annotation {
     this.visible = true;
     
     this.kwarg(kwargs, "autoremove", false);
-  }
-    
-  kwarg(kwargs, name, defaultValue) {
-    if(name in kwargs) {
-      this[name] = kwargs[name];
-    } else {
-      this[name] = defaultValue;
-    }
   }
   
   draw(ctx, voffset={"x": 0, "y": 0}, scale=1) {
@@ -336,6 +439,15 @@ class Annotation {
   set state(state) {
     this.visible = state.visible;
   }
+  
+  setCenter(d) {
+    this.x = Math.round(d.x - (this.w / 2));
+    this.y = Math.round(d.y - (this.h / 2));
+  }
+  
+  getCenter() {
+    return {"x": Math.round(this.x + (this.w / 2)), "y": Math.round(this.y + (this.h / 2))};
+  }
 }
 
 class Map {
@@ -355,6 +467,24 @@ class Map {
     if(type == Map.OBJ_STATIC) { this.sobjects.push(obj); } else
     if(type == Map.OBJ_TRACKED) { this.tobjects.push(obj); } else
     if(type == Map.OBJ_UNTRACKED) { this.uobjects.push(obj); }
+  }
+  
+  autoAddObject(obj) {
+    if(obj instanceof Box) {
+      this.addObject(obj, Map.OBJ_STATIC);
+      this.lastBox = obj;
+    } else if(obj instanceof Coin) {
+      this.addObject(obj);
+    } else if(obj instanceof Portal) {
+      this.addObject(obj, Map.OBJ_STATIC);
+    } else if(obj instanceof Entity) {
+      obj.map = this;
+      this.addObject(obj);
+    } else if(obj instanceof Annotation) {
+      this.addObject(obj);
+    } else {
+      this.addObject(obj);
+    }
   }
   
   addBox(box) {
@@ -382,11 +512,11 @@ class Map {
     this.addObject(annotation);
   }
   
-  collide(box) {
+  collide(box, needSolid=true) {
     var o = [this.sobjects, this.tobjects, this.uobjects];
     for(var n = 0; n < o.length; n++) {
       for(var i = 0; i < o[n].length; i++) {
-        if(o[n][i] instanceof Box) {
+        if("collide" in o[n][i] && (o[n][i].solid === true || !needSolid)) {
           if(o[n][i].collide(box)) {
             return o[n][i];
           }
@@ -418,14 +548,14 @@ class Map {
   }
   
   draw(ctx, voffset={"x": 0, "y": 0}, scale=1) {
+    var dw = ctx.canvas.width;
+    var dh = ctx.canvas.height;
+    
     var tile = this.background;
     if(tile != undefined) {
       if(imgLoaded(tile)) {
         var tileW = 512;
         var tileH = 512;
-        
-        var dw = ctx.canvas.width;
-        var dh = ctx.canvas.height;
         
         var xmin = Math.floor(voffset.x / tileW) * tileW;
         var ymin = Math.floor(voffset.y / tileH) * tileH;
@@ -441,10 +571,13 @@ class Map {
       }
     }
     
+    var vwin = new Box(voffset.x, voffset.y, dw * (1 / scale), dh * (1 / scale));
+    
     var o = [this.sobjects, this.tobjects, this.uobjects];
     for(var n = 0; n < o.length; n++) {
       for(var i = 0; i < o[n].length; i++) {
         if("draw" in o[n][i]) {
+          if("collide" in o[n][i]) { if(!o[n][i].collide(vwin)) { continue; } }
           o[n][i].draw(ctx, voffset, scale);
         }
       }
@@ -500,5 +633,51 @@ class Map {
         this.tobjects[i].state = data[i];
       }
     }
+  }
+  
+  serialize() {
+    var sdata = {};
+    var d = [];
+    var o = [this.sobjects, this.tobjects, this.uobjects];
+    for(var n = 0; n < o.length; n++) {
+      var sec = [];
+      for(var i = 0; i < o[n].length; i++) {
+        sec.push({"type": o[n][i].constructor.name, "data": o[n][i].serialize()});
+      }
+      d.push(sec);
+    }
+    sdata.objects = d;
+    
+    var val = getImgIndex(this.background); if(val != undefined) { sdata.background = val; }
+    
+    return sdata;
+  }
+  
+  static deserialize(sdata) {
+    var obj = new Map();
+    var d = sdata.objects;
+    var o = ["sobjects", "tobjects", "uobjects"];
+    for(var n = 0; n < d.length; n++) {
+      for(var i = 0; i < d[n].length; i++) {
+        var data = d[n][i];
+        var classType = null;
+        var classes = [Box, Coin, Portal, Entity, Annotation];
+        for(var x = 0; x < classes.length; x++) {
+          if(classes[x].name == data.type) {
+            classType = classes[x];
+            break;
+          }
+        }
+        if(classType != null) {
+          var gObj = classType.deserialize(data.data);
+          if(gObj instanceof Entity) { gObj.map = obj; }
+          obj[o[n]].push(gObj);
+        }
+      }
+    }
+    
+    if("background" in sdata) { obj.background = imgs[sdata.background]; }
+    
+    return obj;
   }
 }

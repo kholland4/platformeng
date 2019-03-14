@@ -1,5 +1,9 @@
 class Player {
-  constructor(map, speedMul=2) {
+  constructor(map, kwargs={}) {
+    this.kwarg(kwargs, "speedMul", 2);
+    this.kwarg(kwargs, "spectate", false);
+    var speedMul = this.speedMul;
+    
     this.map = map;
     
     this.pos = {"x": 0, "y": 0, "rot": 0};
@@ -17,6 +21,29 @@ class Player {
     this.drawData = {"radius": 20};
     
     this.coinCount = 0;
+  }
+  
+  set speedMul(speedMul) {
+    this._speedMul = speedMul;
+    
+    this.maxSpeed = {"x": 250 * speedMul, "y": 250 * speedMul};
+    this.accel = {"x": 500 * speedMul, "y": 500 * speedMul};
+    this.accelIdle = {"x": 500 * speedMul, "y": 500 * speedMul};
+
+    this.gravity = {"x": 0, "y": 800 * speedMul};
+    this.realMaxSpeed = {"x": 500 * speedMul, "y": 500 * speedMul};
+  }
+  
+  get speedMul() {
+    return this._speedMul;
+  }
+    
+  kwarg(kwargs, name, defaultValue) {
+    if(name in kwargs) {
+      this[name] = kwargs[name];
+    } else {
+      this[name] = defaultValue;
+    }
   }
   
   animate(timeScale, controls=this.controls) {
@@ -55,6 +82,20 @@ class Player {
         
         this.controls = controls;
       }
+    }
+    
+    if(this.spectate) {
+      //---Contstraints---
+      this.speed.x = Math.min(Math.max(this.speed.x, -this.realMaxSpeed.x), this.realMaxSpeed.x);
+      this.speed.y = Math.min(Math.max(this.speed.y, -this.realMaxSpeed.y), this.realMaxSpeed.y);
+      
+      this.pos.x += this.speed.x * timeScale;
+      this.pos.y += this.speed.vy * timeScale;
+      
+      this.pos.rot += ((this.speed.x * timeScale) / (this.drawData.radius * 2 * Math.PI)) * 2 * Math.PI;
+      this.pos.rot = this.pos.rot % (Math.PI * 2);
+      
+      return;
     }
     
     //---Gravity---
@@ -202,5 +243,23 @@ class Player {
   
   getSpeed() {
     return {x: this.speed.x, y: this.speed.y};
+  }
+  
+  serialize() {
+    var data = {};
+    for(var key in this) {
+      if(typeof this[key] != "undefined" && typeof this[key] != "function" && !(typeof this[key] == "object" && this[key].constructor.name != "Object")) {
+        data[key] = this[key];
+      }
+    }
+    return data;
+  }
+  
+  static deserialize(data) {
+    var obj = new this();
+    for(var key in data) {
+      obj[key] = data[key];
+    }
+    return obj;
   }
 }
