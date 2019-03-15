@@ -262,4 +262,13 @@ class Player {
     }
     return obj;
   }
+  
+  setCenter(d) {
+    this.pos.x = Math.round(d.x);
+    this.pos.y = Math.round(d.y);
+  }
+  
+  getCenter() {
+    return {"x": this.pos.x, "y": this.pos.y};
+  }
 }

@@ -7,7 +7,8 @@ var imgURLs = [
   ["slime", "slime.png"],
   ["bktile", "tile-base.png"],
   ["instructions.png", "instructions.png"],
-  ["instructions2.png", "instructions2.png"]
+  ["instructions2.png", "instructions2.png"],
+  ["unknown", "unknown.png"]
 ];
 for(var i = 0; i < imgURLs.length; i++) {
   var img = document.createElement("img");

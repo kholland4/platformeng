@@ -28,7 +28,7 @@ function deserializeGame(d) {
   map = Map.deserialize(d.map);
   player = Player.deserialize(d.player);
   player.map = map;
-  if(hud != undefined) {
+  if(typeof hud != "undefined") {
     hud.map = map;
     hud.player = player;
   }
@@ -45,7 +45,9 @@ function exportGame() {
   document.body.removeChild(a);
 }
 
-function importGame() {
+var _importGame_callback;
+function importGame(callback=undefined) {
+  _importGame_callback = callback;
   var fileInput = document.createElement("input");
   fileInput.type = "file";
   fileInput.onchange = importGameFile;
@@ -67,6 +69,7 @@ function importGameFile(e) {
         try {
           var data = JSON.parse(e.target.result);
           deserializeGame(data);
+          if(_importGame_callback != undefined) { _importGame_callback(); }
         } catch(e) {
           //TODO error message
         }

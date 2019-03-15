@@ -23,7 +23,13 @@ function dragStart(e) {
   mouse = screenToWorld(smouse.x, smouse.y);
   
   dragTarget = map.collide(new Box(mouse.x, mouse.y, 1, 1), false);
-  if(dragTarget === false) { dragTarget = null; }
+  if(dragTarget === false) {
+    if(player.collide(new Box(mouse.x, mouse.y, 1, 1))) {
+      dragTarget = player;
+    } else {
+      dragTarget = null;
+    }
+  }
   lastSel = dragTarget;
   
   if(dragTarget != null) {
@@ -117,6 +123,15 @@ function showPropsUI(obj=lastSel) {
     col2.appendChild(input);
   }
   
+  var btn = document.createElement("button");
+  btn.innerText = "Duplicate";
+  btn.onclick = function() {
+    if(lastSel != null) {
+      addObject(lastSel.constructor.deserialize(lastSel.serialize()));
+    }
+  };
+  container.appendChild(btn);
+  
   document.getElementById("sidepanel").style.display = "block";
 }
 function updatePropsUI(obj=lastSel) {
@@ -135,6 +150,33 @@ function updatePropsUI(obj=lastSel) {
     
     container.children[1].children[i].value = obj[key];
     i++;
+  }
+}
+
+function lExportGame() {
+  var ospectate = player.spectate;
+  var ospeedMul = player.speedMul;
+  player.spectate = false;
+  player.speedMul = 2;
+  exportGame();
+  player.spectate = ospectate;
+  player.speedMul = ospeedMul;
+}
+
+function lImportGame() {
+  importGame(function() {
+    player.spectate = true;
+    player.speedMul = 4;
+  });
+}
+
+function addCtl(name) {
+  if(name == "box") {
+    addObject(new Box(0, 0, 300, 50));
+  } else if(name == "coin") {
+    addObject(new Coin(0, 0));
+  } else if(name == "annotation") {
+    addObject(new Annotation(0, 0, 100, 100, "image", imgs.unknown));
   }
 }
 
@@ -158,11 +200,11 @@ function init() {
       player.speed.x = 0;
       player.speed.y = 0;
     } else if(e.key == "b") {
-      addObject(new Box(0, 0, 300, 50));
+      addCtl("box");
     } else if(e.key == "c") {
-      addObject(new Coin(0, 0));
+      addCtl("coin");
     } else if(e.key == "n") {
-      addObject(new Annotation(0, 0, 100, 100, "image", imgs.coin));
+      addCtl("annotation");
     }
   });
   
@@ -232,7 +274,7 @@ function animate() {
   if(timeFlow > 0) {
     timeScale *= timeFlow;
     
-    map.animate(ttime, timeScale, getControls());
+    map.animate(ttime, timeScale);
     map.draw(ctx, voffset, dSize.scale);
     
     player.animate(timeScale, getControls());

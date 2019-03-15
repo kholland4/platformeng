@@ -183,6 +183,8 @@ function animate() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, dSize.w, dSize.h);
     ctx.globalAlpha = 1;
+    
+    if(ttime < 0) { timelineOffset = time; }
   }
 }
 
