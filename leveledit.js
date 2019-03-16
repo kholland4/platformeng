@@ -218,7 +218,7 @@ function init() {
   initControls();
   map = new Map();
   
-  map.background = image("tile-base.png");
+  map.background = imgs.bktile;
   
   for(var i = 0; i < 10; i++) {
     map.addBox(new Box(20 + (i * 500), 300 - (i * 150), 300, 50));
