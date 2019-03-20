@@ -21,6 +21,7 @@ class Player {
     this.drawData = {"radius": 20};
     
     this.coinCount = 0;
+    this.alive = true;
   }
   
   set speedMul(speedMul) {
@@ -46,7 +47,13 @@ class Player {
     }
   }
   
-  animate(timeScale, controls=this.controls) {
+  die() {
+    this.alive = false;
+  }
+  
+  animate(timeScale, controls=this.controls, immortal=false) {
+    if(!this.alive && !immortal) { return; }
+    
     if(controls != undefined) {
       //---Main controls---
       for(var i = 0; i < 2; i++) {
@@ -118,6 +125,8 @@ class Player {
     
     //---Actual motion + jumping logic---
     
+    var currentContactBox = null;
+    
     //---X axis---
     var sticky = false;
     var stickySide = 1;
@@ -125,6 +134,7 @@ class Player {
     var c = this.collide();
     if(c) {
       this.contactBox = c;
+      currentContactBox = c;
       this.pos.x -= this.speed.x * timeScale * (1 + cSpeed.x * 0.1);
       if(this.speed.x > 0) {
         stickySide = -1;
@@ -155,6 +165,7 @@ class Player {
     var c = this.collide();
     if(c) {
       this.contactBox = c;
+      currentContactBox = c;
       this.pos.y -= this.speed[d] * timeScale;
       if(!c.bouncy) {
         if(this.speed[d] > 0) {
@@ -172,6 +183,13 @@ class Player {
     }
     if(sticky) {
       this.canJump = true;
+    }
+    
+    //---Death from hazards and such---
+    if(currentContactBox != null && !immortal) {
+      if(currentContactBox.death) {
+        this.die();
+      }
     }
   }
   
@@ -212,7 +230,8 @@ class Player {
       "pos": {"x": this.pos.x, "y": this.pos.y, "rot": this.pos.rot},
       "speed": {"x": this.speed.x, "y": this.speed.y, "vy": this.speed.vy},
       "canJump": this.canJump,
-      "coinCount": this.coinCount
+      "coinCount": this.coinCount,
+      "alive": this.alive
     };
     if(this.controls != undefined) {
       data.controls = JSON.parse(JSON.stringify(this.controls));
@@ -230,6 +249,7 @@ class Player {
     this.canJump = state.canJump;
     this.coinCount = state.coinCount;
     this.controls = state.controls;
+    this.alive = state.alive;
   }
   
   getPos() {

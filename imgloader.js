@@ -5,6 +5,7 @@ var imgURLs = [
   ["brick", "brick.png"],
   ["block", "block.png"],
   ["slime", "slime.png"],
+  ["lava", "lava.png"],
   ["bktile", "tile-base.png"],
   ["instructions.png", "instructions.png"],
   ["instructions2.png", "instructions2.png"],

@@ -528,6 +528,19 @@ class Map {
     this.addObject(annotation);
   }
   
+  autoDelObject(obj) {
+    var o = [this.sobjects, this.tobjects, this.uobjects];
+    for(var n = 0; n < o.length; n++) {
+      for(var i = 0; i < o[n].length; i++) {
+        if(o[n][i] == obj) {
+          o[n].splice(i, 1);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  
   collide(box, needSolid=true) {
     var o = [this.sobjects, this.tobjects, this.uobjects];
     for(var n = 0; n < o.length; n++) {

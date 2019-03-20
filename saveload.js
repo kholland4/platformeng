@@ -79,3 +79,16 @@ function importGameFile(e) {
     reader.readAsText(file);
   }
 }
+
+function importGameURL(url) {
+  loadf(url, function() {
+    deserializeGame(JSON.parse(this.responseText));
+  });
+}
+
+function resetTime() {
+  if(typeof timeline != "undefined") {
+    timeline = [];
+    timelineOffset = performance.now();
+  }
+}

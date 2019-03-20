@@ -11,6 +11,7 @@ var lastSel = null;
 var dragOffset = {"x": 0, "y": 0};
 var mouse = {"x": 0, "y": 0};
 var smouse = {"x": 0, "y": 0};
+var dragSnap = false;
 
 function screenToWorld(x, y) {
   x = (x / dSize.scale) + voffset.x;
@@ -50,7 +51,17 @@ function dragUpdate(e) {
   if(e != undefined) { smouse.x = e.clientX; smouse.y = e.clientY; }
   mouse = screenToWorld(smouse.x, smouse.y);
   if(dragging && dragTarget != null) {
-    dragTarget.setCenter({"x": mouse.x + dragOffset.x, "y": mouse.y + dragOffset.y});
+    if(dragSnap) {
+      if(dragTarget instanceof Box) {
+        var xd = ((dragTarget.w / 2) % 50);
+        var yd = ((dragTarget.h / 2) % 50);
+        dragTarget.setCenter({"x": (Math.round((mouse.x + dragOffset.x - xd) / 50) * 50) + xd, "y": (Math.round((mouse.y + dragOffset.y - yd) / 50) * 50) + yd});
+      } else {
+        dragTarget.setCenter({"x": Math.round((mouse.x + dragOffset.x) / 50) * 50, "y": Math.round((mouse.y + dragOffset.y) / 50) * 50});
+      }
+    } else {
+      dragTarget.setCenter({"x": mouse.x + dragOffset.x, "y": mouse.y + dragOffset.y});
+    }
   }
   
   if(document.activeElement == document.body) {
@@ -125,9 +136,22 @@ function showPropsUI(obj=lastSel) {
   
   var btn = document.createElement("button");
   btn.innerText = "Duplicate";
+  btn.title = "hotkey: v";
   btn.onclick = function() {
     if(lastSel != null) {
       addObject(lastSel.constructor.deserialize(lastSel.serialize()));
+    }
+  };
+  container.appendChild(btn);
+  
+  var btn = document.createElement("button");
+  btn.innerText = "Delete";
+  btn.title = "hotkey: x";
+  btn.onclick = function() {
+    if(lastSel != null) {
+      map.autoDelObject(lastSel);
+      lastSel = null;
+      showPropsUI();
     }
   };
   container.appendChild(btn);
@@ -189,7 +213,7 @@ function init() {
   canvas.addEventListener("mousemove", dragUpdate);
   document.addEventListener("keydown", function(e) {
     if(document.activeElement != document.body) { return; }
-    if(e.keyCode == 13) {
+    if(e.keyCode == 13) { //enter
       if(player.spectate) {
         player.spectate = false;
         player.speedMul = 2;
@@ -205,6 +229,24 @@ function init() {
       addCtl("coin");
     } else if(e.key == "n") {
       addCtl("annotation");
+    } else if(e.key == "x") {
+      if(lastSel != null) {
+        map.autoDelObject(lastSel);
+        lastSel = null;
+        showPropsUI();
+      }
+    } else if(e.key == "v") {
+      if(lastSel != null) {
+        addObject(lastSel.constructor.deserialize(lastSel.serialize()));
+      }
+    } else if(e.keyCode == 17) { //ctrl
+      dragSnap = true;
+    }
+  });
+  document.addEventListener("keyup", function(e) {
+    if(document.activeElement != document.body) { return; }
+    if(e.keyCode == 17) { //ctrl
+      dragSnap = false;
     }
   });
   
@@ -220,7 +262,7 @@ function init() {
   
   map.background = imgs.bktile;
   
-  for(var i = 0; i < 10; i++) {
+  for(var i = 0; i < 3; i++) {
     map.addBox(new Box(20 + (i * 500), 300 - (i * 150), 300, 50));
   }
   
@@ -277,7 +319,7 @@ function animate() {
     map.animate(ttime, timeScale);
     map.draw(ctx, voffset, dSize.scale);
     
-    player.animate(timeScale, getControls());
+    player.animate(timeScale, getControls(), true);
     player.draw(ctx, voffset, dSize.scale);
     
     //player.coinCount += map.gatherCoins(player);

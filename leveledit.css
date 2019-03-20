@@ -45,32 +45,3 @@
   margin-top: 2px;
 }
 .sp-col-dropdown { height: 22px; }
-
-#controls {
-  position: fixed;
-  left: 0;
-  top: 0;
-  padding: 4px;
-  
-  user-select: none;
-}
-.ctl-button {
-  display: inline-block;
-  
-  padding: 4px;
-  margin: 4px;
-  
-  font-family: sans-serif;
-  font-size: 14px;
-  
-  color: black;
-  background-color: #ffffffaa;
-}
-.ctl-color-1 {
-  color: black;
-  background-color: #ffffffaa;
-}
-.ctl-color-2 {
-  color: white;
-  background-color: #777777aa;
-}

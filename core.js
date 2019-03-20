@@ -186,6 +186,13 @@ function animate() {
     
     if(ttime < 0) { timelineOffset = time; }
   }
+  
+  if(!player.alive) {
+    ctx.globalAlpha = 0.2;
+    ctx.fillStyle = "red";
+    ctx.fillRect(0, 0, dSize.w, dSize.h);
+    ctx.globalAlpha = 1;
+  }
 }
 
 class TimelineState {

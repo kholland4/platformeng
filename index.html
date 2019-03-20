@@ -10,10 +10,16 @@
 <script src="imgloader.js" type="text/javascript"></script>
 <script src="hud.js" type="text/javascript"></script>
 <script src="saveload.js" type="text/javascript"></script>
+<script src="levelsel.js" type="text/javascript"></script>
 </head>
 <body>
 <div id="main">
   <canvas id="canvas"></canvas>
+</div>
+<div id="controls">
+  <div class="ctl-button ctl-color-1" onclick="showLevelSelect(this);">Select Level</div>
+  
+  <div class="ctl-button ctl-color-2" onclick="importGame(); resetTime();">Import</div>
 </div>
 </body>
 </html>
