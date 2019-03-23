@@ -242,7 +242,23 @@ class Portal extends GameObject {
       player.setPos(this.partner.x + vec.x, this.partner.y + vec.y);
     }
   }
+  
+  get targetX() {
+    return this.partner.x;
+  }
+  get targetY() {
+    return this.partner.y;
+  }
+  
+  set targetX(val) {
+    this.partner.x = val;
+  }
+  set targetY(val) {
+    this.partner.y = val;
+  }
 }
+Object.defineProperty(Portal.prototype, "targetX", {enumerable: true});
+Object.defineProperty(Portal.prototype, "targetY", {enumerable: true});
 
 class Entity extends GameObject {
   static get B_CONSTANT() { return 2; }
@@ -253,6 +269,7 @@ class Entity extends GameObject {
     this.map = map;
     
     this.behavior = behavior;
+    this.death = false;
     
     this.pos = {"x": x, "y": y};
     this.speed = {"x": sx * speedMul, "y": sy * speedMul};
@@ -368,7 +385,8 @@ class Entity extends GameObject {
       speed: {"x": this.speed.x, "y": this.speed.y},
       ospeed: {"x": this.ospeed.x, "y": this.ospeed.y},
       canJump: this.canJump,
-      behavior: this.behavior
+      behavior: this.behavior,
+      death: this.death
     };
   }
   
@@ -381,6 +399,7 @@ class Entity extends GameObject {
     this.ospeed.y = state.ospeed.y;
     this.canJump = state.canJump;
     this.behavior = state.behavior;
+    this.death = state.death;
   }
   
   setCenter(d) {

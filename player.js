@@ -186,9 +186,18 @@ class Player {
     }
     
     //---Death from hazards and such---
-    if(currentContactBox != null && !immortal) {
-      if(currentContactBox.death) {
-        this.die();
+    if(!immortal) {
+      if(currentContactBox != null) {
+        if(currentContactBox.death) {
+          this.die();
+        }
+      }
+      
+      var collideObj = this.map.collide(this.boundingBox(), false);
+      if(collideObj != false) {
+        if("death" in collideObj && collideObj.death === true) {
+          this.die();
+        }
       }
     }
   }

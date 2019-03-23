@@ -10,6 +10,7 @@
 <script src="map.js" type="text/javascript"></script>
 <script src="imgloader.js" type="text/javascript"></script>
 <script src="saveload.js" type="text/javascript"></script>
+<script src="levelsel.js" type="text/javascript"></script>
 </head>
 <body>
 <div id="main">
@@ -20,6 +21,7 @@
   <div id="sp-main"></div>
 </div>
 <div id="controls">
+  <div class="ctl-button ctl-color-1" onclick="showLevelSelect(this);">Select Level</div> <!-- TODO - lImportGame style behavior -->
   <div class="ctl-button ctl-color-1" onclick="lImportGame();">Import</div>
   <div class="ctl-button ctl-color-1" onclick="lExportGame();">Export</div>
   
