@@ -1,6 +1,6 @@
 # platformeng
 Basic platformer game
 
-\*\* WORK IN PROGRESS \*\*
+[Play](https://www.tausquared.net/platformeng/)
 
-Copyright: public domain; all code and assets are original
+[Level editor](https://www.tausquared.net/platformeng/leveledit.html)
